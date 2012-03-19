@@ -9,15 +9,17 @@
 ## Requirements
 
   - Node 0.6.x
-  - Commander Node module
-
-    $ npm install commander
+  - Commander Node module    
 
 ## Initialization
 
-Initialize enver and create RSA keys that will be placed in ~/.enver
+Copy or clone the script inside your ~/bin directory.
+Install Commander module and initialize enver.
 
+    $ npm install commander
     $ enver init
+
+`init` creates the RSA keys that will be placed in ~/.enver
 
 #Commands
 ###Import
