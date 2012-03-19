@@ -3,7 +3,7 @@
 
   Enver is a Node.js script that runs in your shell to easily manage your accounts informations.
   With enver you can save your account informations in json format for fast access in the future.
-  This is an utility to get authentication data always ready when you're connecting to remote machines or doing something that requires a password.
+  This is an utility to have authentication data always ready when you're connecting to remote machines or doing something that requires a password.
   Saved informations will be encrypted and keept safe.
 
 ## Requirements
