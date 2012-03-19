@@ -28,7 +28,7 @@ You can easily import a json file. This will not erase your previously inserted 
     "project-name": {
         "ssh": {
             "user": "foo",
-            "pwd": "bar"
+            "password": "bar"
         }
     }
 }
@@ -64,11 +64,11 @@ $ enver list
 project-name
 └ ssh
   └ user
-  └ pwd
+  └ password
 
 $ enver list project-name.ssh
 user
-pwd
+password
 ```
 
 ## Links
