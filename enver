@@ -1,0 +1,211 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var path = require('path');
+var util = require('util');
+var program = require('commander');
+var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
+var crypto = require('crypto');
+
+var enverDir = process.env.HOME+"/.enver";
+var enverDbName = "db"; 
+
+function puts(error, stdout, stderr) { if (stderr) util.puts(stderr) }
+function pbcopy(string) {
+  exec("printf \""+string.replace(/"/g,'\\"')+"\" | pbcopy", puts);
+}
+function execute(cmd, cb) {
+  exec(cmd, { cwd: enverDir }, cb);
+}
+
+function savedb(newdb) {
+  // crypting
+  var aeskey = crypto.randomBytes(128).toString('base64');
+  //console.log('echo "'+(escape(JSON.stringify(newdb)).replace(/%/g,'#'))+'"')
+  execute('echo "'+(escape(JSON.stringify(newdb)).replace(/%/g,'#'))+'" | openssl enc -aes-256-cbc -nosalt -pass pass:'+aeskey+' -out db', function(error, stdout, stderr) {
+    if (stderr) console.log(stderr);
+    execute("echo "+aeskey+" | openssl rsautl -encrypt -inkey id_rsa.pub -pubin -out key", function(error, stdout, stderr) {
+      if (stderr) console.log(stderr);
+    });
+  });
+
+}
+function readdb(cb) {
+  // decrypting
+  execute("openssl rsautl -decrypt -inkey id_rsa -in key", function(error, stdout, stderr) {
+    var decryptedkey = stdout.toString().replace(/\n/g,'');
+    //if (stderr) console.log(stderr);
+    execute("printf "+decryptedkey+" | openssl enc -d -aes-256-cbc -nosalt -in db -pass stdin", function(error, stdout, stderr) {
+      if (stderr) console.log(stderr);
+      var decrypteddb = stdout;
+      //console.log(JSON.parse(unescape(decrypteddb.replace(/#/g,'%'))));
+      if (decrypteddb) {
+        cb(JSON.parse(unescape(decrypteddb.replace(/#/g,'%'))));
+      } else {
+        //console.log("Database not decrypted correctly!")
+        cb({});
+      }
+    })
+  });
+}
+
+function extend(a, b, context, newobjs, aparent, aname, haveaparent) {
+  if (a==b){ return a;}
+  if (!b)  { return a;}
+
+  var key, clean_context=false, return_sublevel=false,b_pos;
+  if(!haveaparent){ aparent={'a':a}; aname='a'; }
+  if(!context){clean_context=true;context=[];newobjs=[];}
+  b_pos=context.indexOf(b);
+  if( b_pos==-1 ) {context.push(b);newobjs.push([aparent, aname]);} else { return newobjs[b_pos][0][ newobjs[b_pos][1] ]; }
+
+  for (key in b)
+  {
+   if(b.hasOwnProperty(key))
+   { 
+   if(typeof a[key] === 'undefined')
+   {   
+    if(typeof b[key] === 'object')
+    {
+     if( b[key] instanceof Array ) // http://javascript.crockford.com/remedial.html
+      {a[key] = extend([], b[key],context,newobjs,a,key,true);}
+     else if(b[key]===null)
+      {a[key] = null;}
+     else if( b[key] instanceof Date )
+      { a[key]= new b[key].constructor();a[key].setTime(b[key].getTime());  }
+     else
+      { a[key] = extend({}, b[key],context,newobjs,a,key,true); /*a[key].constructor = b[key].constructor;  a[key].prototype = b[key].prototype;*/ }
+    }
+    else
+    {  a[key] = b[key]; }
+   }
+   else if(typeof a[key] === 'object' && a[key] !== null)
+   {  a[key] = extend(a[key], b[key],context,newobjs,a,key,true); /*a[key].constructor = b[key].constructor;  a[key].prototype = b[key].prototype;*/ }
+   else  
+   {  a[key] = b[key]; }
+  }
+  }
+  if(clean_context) {context=null;newobjs=null;}
+  if(!haveaparent)
+  {
+  aparent=null;
+  return a;
+  }
+  if(typeof a === 'object' && !(a instanceof Array) )
+  {
+  /*a.constructor = b.constructor;
+  a.prototype   = b.prototype*/;
+  } 
+  return a;
+}
+
+function dump(obj, indent) {
+  var indent = indent || '';
+  for (subobj in obj) {
+    if (typeof subobj == 'string')
+      console.log(indent+subobj);
+    if (typeof obj[subobj] != 'string')
+      dump(obj[subobj],indent.replace('└',' ')+'└ ');
+  }
+}
+
+program
+  .command('init')
+  .description('initialize enver')
+  .action(function() {
+    path.exists(enverDir, function (exists) {
+      if (!exists) {
+        fs.mkdirSync(enverDir);
+      }
+      console.log('Generating RSA keys...');
+      execute("openssl genrsa -out id_rsa 4096", function() {
+        execute("openssl rsa -in id_rsa -out id_rsa.pub -outform PEM -pubout", function() {
+          savedb({});
+          console.log("enver initialized! type enver -h for help");
+        });
+      });
+    });
+  });
+if (path.existsSync(enverDir)) {
+  readdb(function(db) {
+    program
+      .version('0.0.1')
+      .option('-s, --show', 'print the retrieved key')
+      .option('-e, --execute', 'execute the retrieved key')
+
+
+
+    program
+      .command('add [path]')
+      .description('add a new object')
+      .action(function(path) {
+        program.password('Value: ', function(value) {
+          var splittedPath = path.split('.');
+          var curPath = splittedPath[0];
+          for (var i = 1; i <= splittedPath.length; i++) {
+            if (!eval("db."+curPath)) {
+              eval(util.format("db.%s = {}", curPath));
+            }
+            curPath += '.'+splittedPath[i];
+          }
+          eval('db.'+path+' = value;');
+          process.stdin.destroy();
+          savedb(db);
+        });
+      });
+
+    program
+      .command('import [file]')
+      .description('import a json file')
+      .action(function(file) {
+        var jsonfile = JSON.parse(fs.readFileSync(file, "utf8"));
+        var newdb = extend(db,jsonfile);
+        savedb(newdb);
+      });
+
+    program
+      .command('delete [path]')
+      .description('delete the specified object')
+      .action(function(path) {
+        try {
+          eval(util.format("delete db.%s", path));
+          savedb(db);
+        } catch(e) {
+          console.log('path not found');
+        }
+      });
+
+    program
+      .command('list [path]')
+      .description('list all objects')
+      .action(function(path) {
+        if (path)
+          dump(eval("db."+path));
+        else
+          dump(db);
+      });
+
+    program
+      .command('get [path]')
+      .description('retrieve the key and copy it to clipboard')
+      .action(function(path) {
+        var retrievedKey;
+        try {
+           retrievedKey = eval("db."+path);
+        } catch(e) { console.log('path not found'); return; }
+        if (retrievedKey) {
+          if (typeof retrievedKey == 'string') {
+            pbcopy(retrievedKey);
+          } else {
+            console.log('invalid path');
+          }
+        } else {
+          console.log('key not found');
+        } 
+      });
+    program.parse(process.argv);
+  });
+} else {
+  program.parse(process.argv);
+}
