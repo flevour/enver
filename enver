@@ -22,7 +22,6 @@ function execute(cmd, cb) {
 function savedb(newdb) {
   // crypting
   var aeskey = crypto.randomBytes(128).toString('base64');
-  //console.log('echo "'+(escape(JSON.stringify(newdb)).replace(/%/g,'#'))+'"')
   execute('echo "'+(escape(JSON.stringify(newdb)).replace(/%/g,'#'))+'" | openssl enc -aes-256-cbc -nosalt -pass pass:'+aeskey+' -out db', function(error, stdout, stderr) {
     if (stderr) console.log(stderr);
     execute("echo "+aeskey+" | openssl rsautl -encrypt -inkey id_rsa.pub -pubin -out key", function(error, stdout, stderr) {
@@ -39,11 +38,9 @@ function readdb(cb) {
     execute("printf "+decryptedkey+" | openssl enc -d -aes-256-cbc -nosalt -in db -pass stdin", function(error, stdout, stderr) {
       if (stderr) console.log(stderr);
       var decrypteddb = stdout;
-      //console.log(JSON.parse(unescape(decrypteddb.replace(/#/g,'%'))));
       if (decrypteddb) {
         cb(JSON.parse(unescape(decrypteddb.replace(/#/g,'%'))));
       } else {
-        //console.log("Database not decrypted correctly!")
         cb({});
       }
     })
