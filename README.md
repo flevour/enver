@@ -59,7 +59,7 @@ After this command you will be prompted to insert the value of the object so it 
     
 This command will show the complete, or partial depending on the presence of [path], json structure without leaves keeping users and passwords hidden.
 
-```js
+```bash
 $ enver list
 project-name
 └ ssh
