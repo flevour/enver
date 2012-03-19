@@ -1,11 +1,15 @@
 
 # Enver
 
-  The fastest way to manage your accounts infos directly from shell.
-  With enver you can save all your account informations in json format for easy access in the future.
+  Enver is a Node.js script that runs in your shell to easily manage your accounts informations.
+  With enver you can save your account informations in json format for fast access in the future.
+  This is an utility to get authentication data always ready when you're connecting to remote machines or doing something that requires a password.
   Saved informations will be encrypted and keept safe.
 
 ## Requirements
+
+  - Node 0.6.x
+  - Commander Node module
 
     $ npm install commander
 
