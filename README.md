@@ -11,7 +11,7 @@
   - Node 0.6.x
   - Commander Node module    
 
-## Initialization
+## Installation
 
 Copy or clone the script inside your ~/bin directory.
 Install Commander module and initialize enver.
