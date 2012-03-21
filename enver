@@ -89,11 +89,6 @@ function extend(a, b, context, newobjs, aparent, aname, haveaparent) {
   aparent=null;
   return a;
   }
-  if(typeof a === 'object' && !(a instanceof Array) )
-  {
-  /*a.constructor = b.constructor;
-  a.prototype   = b.prototype*/;
-  } 
   return a;
 }
 
@@ -127,11 +122,7 @@ program
 if (path.existsSync(enverDir)) {
   readdb(function(db) {
     program
-      .version('0.0.1')
-      .option('-s, --show', 'print the retrieved key')
-      .option('-e, --execute', 'execute the retrieved key')
-
-
+      .version('0.0.1');
 
     program
       .command('add [path]')
