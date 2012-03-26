@@ -192,6 +192,14 @@ if (path.existsSync(enverDir)) {
           console.log('key not found');
         } 
       });
+
+    program
+      .command('export [filepath]')
+      .description('export the json database to file')
+      .action(function(filepath) {
+        fs.writeFileSync(filepath, JSON.stringify(db), 'utf8');
+      });
+
     program.parse(process.argv);
   });
 } else {

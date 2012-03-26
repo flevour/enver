@@ -9,7 +9,7 @@
 ## Requirements
 
   - Node 0.6.x
-  - Commander Node module    
+  - [commander.js](http://visionmedia.github.com/commander.js/) module    
 
 ## Installation
 
@@ -77,6 +77,17 @@ user
 password
 ```
 
+###Export
+
+    $ enver export file.json
+
+This command exports the database in a clear json.
+If you want to format it you may use [jsonlint for node](https://github.com/zaach/jsonlint).
+
 ## Links
 
- - [Node Commander.js](http://visionmedia.github.com/commander.js/)
+ - [commander.js](http://visionmedia.github.com/commander.js/)
+ - [jsonlint for node](https://github.com/zaach/jsonlint)
+ - [nodejs extend](https://github.com/shimondoodkin/nodejs-clone-extend)
+ - [AES](http://it.wikipedia.org/wiki/Advanced_Encryption_Standard)
+ - [RSA](http://en.wikipedia.org/wiki/RSA_\(algorithm\))
