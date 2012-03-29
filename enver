@@ -92,6 +92,23 @@ function extend(a, b, context, newobjs, aparent, aname, haveaparent) {
   return a;
 }
 
+function cmddump(obj, prefix) {
+  var prefix = prefix || [];
+  if (typeof obj != 'string') {
+    for (subobj in obj) {
+      // if (typeof subobj == 'string')
+      //   console.log(prefix+subobj);
+      // if (typeof obj[subobj] != 'string')
+      // console.log(prefix)
+      var prefixCloned = prefix.slice(0);
+      prefixCloned.push(subobj);
+      cmddump(obj[subobj],prefixCloned);
+    }
+  } else {
+    console.log(prefix.join('.'));
+  }
+}
+
 function dump(obj, indent) {
   var indent = indent || '';
   for (subobj in obj) {
@@ -122,7 +139,8 @@ program
 if (path.existsSync(enverDir)) {
   readdb(function(db) {
     program
-      .version('0.0.1');
+      .version('0.0.1')
+      .option('-c, --cmdlist', 'command list')
 
     program
       .command('add [path]')
@@ -201,6 +219,11 @@ if (path.existsSync(enverDir)) {
       });
 
     program.parse(process.argv);
+
+    if (program.cmdlist) {
+      cmddump(db);
+      return;
+    }
   });
 } else {
   program.parse(process.argv);

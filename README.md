@@ -84,6 +84,12 @@ password
 This command exports the database in a clear json.
 If you want to format it you may use [jsonlint for node](https://github.com/zaach/jsonlint).
 
+## Oh My Zsh! autocomplete plugin
+
+place "enver.plugin.zsh" inside your ~/.oh-my-zsh/plugins/ and activate it in your ~/.zshrc file to enable autocomplete for commands and object paths.
+
+special thanks to [flevour](https://github.com/flevour)
+
 ## Links
 
  - [commander.js](http://visionmedia.github.com/commander.js/)
