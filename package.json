@@ -1,0 +1,33 @@
+{
+  "name": "enver",
+  "preferGlobal": "true",
+  "version": "0.1.0",
+  "author": "Flavio Vianello <fvianello@h-art.it>",
+  "description": "easily manage your accounts informations",
+  "contributors": [ 
+    {
+      "name": "Francesco Levorato",
+      "email": "git@flevour.net"
+    } 
+  ],
+  "bin": {
+    "enver": "./enver"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fvianello/enver.git"
+  },
+  "keywords": [
+    "cli",
+    "enver",
+    "pass"
+  ],
+  "dependencies" : {
+    "commander"   :  ">=0.5"
+  },
+  "noAnalyze": true,
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.6"
+  }
+}
